@@ -23,27 +23,36 @@ t = .3 #Thickness of quartz sleeve (cm)
 alpha = math.log(T_water)
 I_0 = T_Silica * (P / (2 * R_L * math.pi * L)) #Initial Intensity (W/cm^2)
 
-x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*rank)-1e-7/size,12700000/size)
+x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*(rank+1)-1e-7/size),12700000/size)
 #x = np.linspace(R_L, R, 12700001) #cm
-I_xout = np.zeros(12700001, dtype = float)
-I_xback = np.zeros(12700001, dtype = float)
+I_xout = np.zeros(int(12700000/size), dtype = float)
+I_xback = np.zeros(int(12700000/size), dtype = float)
 
-I_xout =np.array(I_0 * (R_L / x) * np.exp(alpha * (x-R_L))) #Intensity for Outward Propogation (W/cm^2)
+I_xout = np.array(I_0 * (R_L / x) * np.exp(alpha * (x-R_L))) #Intensity for Outward Propogation (W/cm^2)
 I_wall = I_0 * (R_L / R) * math.exp(alpha * (R-R_L)) #Intensity at the Wall (W/cm^2)
 I_0back = refl_SS * I_wall #Initial Intensity for Inward Propogation (W/cm^2)
 I_xback = np.array(I_0back * (R / x) * np.exp(alpha * (abs(x-R)))) #Intensity for Inward Propogation (W/cm^2)
+I_tot = I_xout + I_xback
+I_mean = np.mean(I_tot)
 
 comm.Barrier()
-I_xout = comm.gather(I_xout, root = 0)
-I_xback = comm.gather(I_xback, root = 0)
+I_mean = comm.gather(I_mean, root = 0)
+#I_xback = comm.gather(I_xback, root = 0)
+#I_xout1 = np.zeros(int(12700000), dtype = float)
+#I_xback1 = np.zeros(int(12700000), dtype = float)
+#num = np.zeros(size, dtype = float) + 12700000/size
+#dis = np.linspace(0, 12700000-(12700000/size), size)
+
+#comm.Gatherv(I_xout, [I_xout1, num, dis, MPI.FLOAT])
+#comm.Gatherv(I_xback, [I_xback1, num, dis, MPI.FLOAT])
 
 if rank == 0:
-	I_total = I_xout + I_xback #Total Intensity (W/cm^2)
-	I_mean = statistics.mean(I_total) #Average Intensity (W/cm^2) (Can assume this for turbulent flow)
+	#I_total = I_xout1 + I_xback1 #Total Intensity (W/cm^2)
+	I_mean2 = np.mean(I_mean) #Average Intensity (W/cm^2) (Can assume this for turbulent flow)
 
 
 	UVD = .016 #UV Dosage Standard (J/cm^2)
-	t = UVD / I_mean #Time of treatment needed (s)
+	t = UVD / I_mean2 #Time of treatment needed (s)
 
 	A_c = (R**2 - R_L**2) * math.pi #Chamber Area (cm^2)
 	v = L / t #Inlet Velocity (cm/s)
@@ -52,4 +61,5 @@ if rank == 0:
 	print("---%f gpm---" %Q)
 
 	print("---%s seconds---" %(time.time()-start_time))
+	
 
