@@ -23,15 +23,15 @@ t = .3 #Thickness of quartz sleeve (cm)
 alpha = math.log(T_water)
 I_0 = T_Silica * (P / (2 * R_L * math.pi * L)) #Initial Intensity (W/cm^2)
 
-x = R_L + (R-R_L/12700001)*(rank+1)
+x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*rank)-2e-8,2540000)
 #x = np.linspace(R_L, R, 12700001) #cm
 I_xout = np.zeros(12700001, dtype = float)
 I_xback = np.zeros(12700001, dtype = float)
 
-I_xout = I_0 * (R_L / x) * np.exp(alpha * (x-R_L)) #Intensity for Outward Propogation (W/cm^2)
+I_xout =np.array(I_0 * (R_L / x) * np.exp(alpha * (x-R_L))) #Intensity for Outward Propogation (W/cm^2)
 I_wall = I_0 * (R_L / R) * math.exp(alpha * (R-R_L)) #Intensity at the Wall (W/cm^2)
 I_0back = refl_SS * I_wall #Initial Intensity for Inward Propogation (W/cm^2)
-I_xback = I_0back * (R / x) * np.exp(alpha * (abs(x-R))) #Intensity for Inward Propogation (W/cm^2)
+I_xback = np.array(I_0back * (R / x) * np.exp(alpha * (abs(x-R)))) #Intensity for Inward Propogation (W/cm^2)
 
 comm.Barrier()
 I_xout = comm.gather(I_xout, root = 0)
