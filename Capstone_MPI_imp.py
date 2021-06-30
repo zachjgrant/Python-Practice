@@ -28,15 +28,16 @@ x = R_L + (R-R_L/12700001)*(rank+1)
 I_xout = np.zeros(12700001, dtype = float)
 I_xback = np.zeros(12700001, dtype = float)
 
-I_xout[rank] = I_0 * (R_L / x) * np.exp(alpha * (x-R_L)) #Intensity for Outward Propogation (W/cm^2)
+I_xout = I_0 * (R_L / x) * np.exp(alpha * (x-R_L)) #Intensity for Outward Propogation (W/cm^2)
 I_wall = I_0 * (R_L / R) * math.exp(alpha * (R-R_L)) #Intensity at the Wall (W/cm^2)
 I_0back = refl_SS * I_wall #Initial Intensity for Inward Propogation (W/cm^2)
-I_xback[rank] = I_0back * (R / x) * np.exp(alpha * (abs(x-R))) #Intensity for Inward Propogation (W/cm^2)
+I_xback = I_0back * (R / x) * np.exp(alpha * (abs(x-R))) #Intensity for Inward Propogation (W/cm^2)
 
 comm.Barrier()
+I_xout = comm.gather(I_xout, root = 0)
+I_xback = comm.gather(I_xback, root = 0)
 
 if rank == 0:
-
 	I_total = I_xout + I_xback #Total Intensity (W/cm^2)
 	I_mean = statistics.mean(I_total) #Average Intensity (W/cm^2) (Can assume this for turbulent flow)
 
