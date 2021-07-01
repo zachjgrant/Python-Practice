@@ -24,7 +24,6 @@ alpha = math.log(T_water)
 I_0 = T_Silica * (P / (2 * R_L * math.pi * L)) #Initial Intensity (W/cm^2)
 
 x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*(rank+1)-1e-7/size),12700000/size)
-#x = np.linspace(R_L, R, 12700001) #cm
 I_xout = np.zeros(int(12700000/size), dtype = float)
 I_xback = np.zeros(int(12700000/size), dtype = float)
 
@@ -35,19 +34,10 @@ I_xback = np.array(I_0back * (R / x) * np.exp(alpha * (abs(x-R)))) #Intensity fo
 I_tot = I_xout + I_xback
 I_mean = np.mean(I_tot)
 
-comm.Barrier()
+#comm.Barrier() <-- Turns out this really isn't needed
 I_mean = comm.gather(I_mean, root = 0)
-#I_xback = comm.gather(I_xback, root = 0)
-#I_xout1 = np.zeros(int(12700000), dtype = float)
-#I_xback1 = np.zeros(int(12700000), dtype = float)
-#num = np.zeros(size, dtype = float) + 12700000/size
-#dis = np.linspace(0, 12700000-(12700000/size), size)
-
-#comm.Gatherv(I_xout, [I_xout1, num, dis, MPI.FLOAT])
-#comm.Gatherv(I_xback, [I_xback1, num, dis, MPI.FLOAT])
 
 if rank == 0:
-	#I_total = I_xout1 + I_xback1 #Total Intensity (W/cm^2)
 	I_mean2 = np.mean(I_mean) #Average Intensity (W/cm^2) (Can assume this for turbulent flow)
 
 
