@@ -33,7 +33,7 @@ t = UVD / I_mean #Time of treatment needed (s)
 A_c = (R**2 - R_L**2) * math.pi #Chamber Area (cm^2)
 v = L / t #Inlet Velocity (cm/s)
 Q = A_c * v * .015850323 #flow rate
-
+end_time = time.time()
 print("---%f gpm---" %Q)
 
-print("---%s seconds---" %(time.time()-start_time))
+print("---%s seconds---" %(end_time-start_time))

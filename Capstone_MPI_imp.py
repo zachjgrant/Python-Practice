@@ -23,7 +23,7 @@ t = .3 #Thickness of quartz sleeve (cm)
 alpha = math.log(T_water)
 I_0 = T_Silica * (P / (2 * R_L * math.pi * L)) #Initial Intensity (W/cm^2)
 
-x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*(rank+1)-1e-7/size),12700000/size)
+x = np.linspace(R_L + (((R-R_L) / size)*rank), R_L + (((R-R_L) / size)*(rank+1)-1e-7/size),int(12700000/size))
 I_xout = np.zeros(int(12700000/size), dtype = float)
 I_xback = np.zeros(int(12700000/size), dtype = float)
 
@@ -47,9 +47,9 @@ if rank == 0:
 	A_c = (R**2 - R_L**2) * math.pi #Chamber Area (cm^2)
 	v = L / t #Inlet Velocity (cm/s)
 	Q = A_c * v * .015850323 #flow rate
-
+	end_time = time.time()
 	print("---%f gpm---" %Q)
 
-	print("---%s seconds---" %(time.time()-start_time))
+	print("---%s seconds---" %(end_time-start_time))
 	
 
